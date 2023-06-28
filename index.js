@@ -1,6 +1,6 @@
 const express = require('express')
 const app = express()
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const cors = require('cors')
 const bodyParser = require('body-parser');
 const port = 5000
@@ -36,6 +36,18 @@ async function run() {
 
 
 
+
+        // user info getting api===================================================
+        app.get('/gettingUserInfo', async( req, res) => {
+            const cursor = userCollection.find()
+            const result = await cursor.toArray();
+            res.send(result);
+        })
+    
+    
+
+
+
     
 
         // user info storing api=============================
@@ -46,6 +58,29 @@ async function run() {
             const result = await userCollection.insertOne(user);
             res.send(result);
         });
+
+
+
+
+        // updating user information==========================
+        app.put('/updateUserInfo/:id', async(req, res) =>{
+            const id = req.params.id;
+            const user = req.body;
+            console.log(id, user);
+            
+            const filter = {_id: new ObjectId(id)}
+            const options = {upsert: true}
+            const updatedUser = {
+                $set: {
+                    status: user.status,
+                    
+                }
+            }
+    
+            const result = await userCollection.updateOne(filter, updatedUser, options );
+            res.send(result);
+    
+        })
 
 
         // Send a ping to confirm a successful connection
