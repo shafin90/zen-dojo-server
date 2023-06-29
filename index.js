@@ -33,6 +33,8 @@ async function run() {
         // Connect the client to the server	(optional starting in v4.7)
         // await client.connect();
         const userCollection = client.db('zen-dojo').collection('usersDB');
+        const pendingClassesCollection = client.db('zen-dojo').collection('pending_classes');
+        const approvedClassesCollection = client.db('zen-dojo').collection('approved_classes');
 
 
 
@@ -79,7 +81,19 @@ async function run() {
     
             const result = await userCollection.updateOne(filter, updatedUser, options );
             res.send(result);
+
     
+        })
+
+
+
+
+        // =========================pending class related api activities===============================================
+        app.post('/pending_classes', async(req,res)=>{
+            const pending_class = req.body;
+            console.log(pending_class); 
+            const result = await pendingClassesCollection.insertOne(pending_class);
+            res.send(result);
         })
 
 
