@@ -97,6 +97,52 @@ async function run() {
         })
 
 
+
+        app.get('/getting_pending_classes', async( req, res) => {
+            const cursor = pendingClassesCollection.find()
+            const result = await cursor.toArray();
+            res.send(result);
+        })
+
+
+
+
+
+
+        // =======================approve class related api activities=================================================
+        app.post('/approve_class', async(req,res)=>{
+            const approve_class = req.body;
+            // console.log(pending_class)
+            approve_class.classStatus = 'approved';
+            const result = await approvedClassesCollection.insertOne(approve_class);
+            res.send(result);
+        })
+
+        
+        
+        app.get('/getting_approved_classes', async( req, res) => {
+            const cursor = approvedClassesCollection.find();
+            const result = await cursor.toArray();
+            res.send(result);
+        })
+
+        
+        
+        // deleting the class from pending class as it has been included in the approved class
+        app.delete('/delete_class/:id', async(req, res) =>{
+            const id = req.params.id;
+            console.log('please delete from database', id);
+            const query = { _id: new ObjectId(id)}
+            
+            const result = await pendingClassesCollection.deleteOne(query);
+            res.send(result);
+        })
+
+
+
+         
+
+
         // Send a ping to confirm a successful connection
         await client.db("admin").command({ ping: 1 });
         console.log("Pinged your deployment. You successfully connected to MongoDB!");
