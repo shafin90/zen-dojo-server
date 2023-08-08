@@ -3,6 +3,7 @@ const app = express()
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const cors = require('cors')
 const bodyParser = require('body-parser');
+const stripe = require('stripe')('sk_test_51NI6RJJlO98Mt1tpbV5uJwn1GRt9lDB2ypwuk8erS5oHxTJxuMNOD0NERGU6Wvr7OI4W7NH7Aq4vAHKj1tjUwWod00RshRSN5G');
 const port = 5000
 
 
@@ -35,6 +36,9 @@ async function run() {
         const userCollection = client.db('zen-dojo').collection('usersDB');
         const pendingClassesCollection = client.db('zen-dojo').collection('pending_classes');
         const approvedClassesCollection = client.db('zen-dojo').collection('approved_classes');
+        const selectedClassesCollection = client.db('zen-dojo').collection('selected_classes');
+        const enrolledClassesCollection = client.db('zen-dojo').collection('enrolled_classes');
+        const instructor_bio = client.db('zen-dojo').collection('instructor_bio');
 
 
 
@@ -129,7 +133,7 @@ async function run() {
         
         
         // deleting the class from pending class as it has been included in the approved class
-        app.delete('/delete_class/:id', async(req, res) =>{
+        app.delete('/delete_class_from_pending_class/:id', async(req, res) =>{
             const id = req.params.id;
             console.log('please delete from database', id);
             const query = { _id: new ObjectId(id)}
@@ -140,9 +144,104 @@ async function run() {
 
 
 
+
+
+        // =============================Deny class related api activities=======================================
+
+        // api for deleting data from pending class as it is denied
+        app.delete('/denied_from_pending_class/:id', async(req, res) =>{
+            const id = req.params.id;
+            console.log('please delete from database', id);
+            const query = { _id: new ObjectId(id)}
+            
+            const result = await pendingClassesCollection.deleteOne(query);
+            res.send(result);
+        }) 
+
+        // api for deleting data from approve class as it is denied
+        app.delete('/denied_from_approved_class/:id', async(req, res) =>{
+            const id = req.params.id;
+            console.log('please delete from  approve database', id);
+            const query = { _id: (id)}
+            
+            const result = await approvedClassesCollection.deleteOne(query);
+            res.send(result);
+        }) 
          
 
 
+
+
+
+
+        // ======================Selected class====================================================================
+        app.post('/selected_class', async(req, res) => {
+            const user = req.body;
+            console.log('new user', user);
+            const result = await selectedClassesCollection.insertOne(user);
+            res.send(result);
+        });
+        app.get('/getting_selected_class', async( req, res) => {
+            const cursor = selectedClassesCollection.find()
+            const result = await cursor.toArray();
+            res.send(result);
+        })
+
+
+
+
+
+
+
+
+
+
+
+       
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        // =================stripe payment================================================
+        app.post('/process_payment', async (req, res) => {
+            const { classId } = req.body;
+            // Fetch the selected class details from the database or any other source
+            
+            try {
+                // Create a Stripe Payment Intent
+                const paymentIntent = await stripe.paymentIntents.create({
+                    amount: selectedClass.amountInCents,
+                    currency: 'usd',
+                    description: `Payment for ${selectedClass.className}`,
+                    metadata: { classId: selectedClass._id.toString() }
+                });
+        
+                // Send the Payment Intent client secret back to the client
+                res.json({ clientSecret: paymentIntent.client_secret });
+            } catch (error) {
+                console.error('Error processing payment:', error);
+                res.status(500).json({ error: 'Payment processing failed' });
+            }
+        });
+
+
+        // ===========================================================================================================
         // Send a ping to confirm a successful connection
         await client.db("admin").command({ ping: 1 });
         console.log("Pinged your deployment. You successfully connected to MongoDB!");
