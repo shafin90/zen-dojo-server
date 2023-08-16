@@ -44,17 +44,17 @@ async function run() {
 
 
         // user info getting api===================================================
-        app.get('/gettingUserInfo', async( req, res) => {
+        app.get('/gettingUserInfo', async (req, res) => {
             const cursor = userCollection.find()
             const result = await cursor.toArray();
             res.send(result);
         })
-    
-    
 
 
 
-    
+
+
+
 
         // user info storing api=============================
         app.post('/users', async (req, res) => {
@@ -69,40 +69,40 @@ async function run() {
 
 
         // updating user information==========================
-        app.put('/updateUserInfo/:id', async(req, res) =>{
+        app.put('/updateUserInfo/:id', async (req, res) => {
             const id = req.params.id;
             const user = req.body;
             console.log(id, user);
-            
-            const filter = {_id: new ObjectId(id)}
-            const options = {upsert: true}
+
+            const filter = { _id: new ObjectId(id) }
+            const options = { upsert: true }
             const updatedUser = {
                 $set: {
                     status: user.status,
-                    
+
                 }
             }
-    
-            const result = await userCollection.updateOne(filter, updatedUser, options );
+
+            const result = await userCollection.updateOne(filter, updatedUser, options);
             res.send(result);
 
-    
+
         })
 
 
 
 
         // =========================pending class related api activities===============================================
-        app.post('/pending_classes', async(req,res)=>{
+        app.post('/pending_classes', async (req, res) => {
             const pending_class = req.body;
-            console.log(pending_class); 
+            console.log(pending_class);
             const result = await pendingClassesCollection.insertOne(pending_class);
             res.send(result);
         })
 
 
 
-        app.get('/getting_pending_classes', async( req, res) => {
+        app.get('/getting_pending_classes', async (req, res) => {
             const cursor = pendingClassesCollection.find()
             const result = await cursor.toArray();
             res.send(result);
@@ -114,7 +114,7 @@ async function run() {
 
 
         // =======================approve class related api activities=================================================
-        app.post('/approve_class', async(req,res)=>{
+        app.post('/approve_class', async (req, res) => {
             const approve_class = req.body;
             // console.log(pending_class)
             approve_class.classStatus = 'approved';
@@ -122,22 +122,22 @@ async function run() {
             res.send(result);
         })
 
-        
-        
-        app.get('/getting_approved_classes', async( req, res) => {
+
+
+        app.get('/getting_approved_classes', async (req, res) => {
             const cursor = approvedClassesCollection.find();
             const result = await cursor.toArray();
             res.send(result);
         })
 
-        
-        
+
+
         // deleting the class from pending class as it has been included in the approved class
-        app.delete('/delete_class_from_pending_class/:id', async(req, res) =>{
+        app.delete('/delete_class_from_pending_class/:id', async (req, res) => {
             const id = req.params.id;
             console.log('please delete from database', id);
-            const query = { _id: new ObjectId(id)}
-            
+            const query = { _id: new ObjectId(id) }
+
             const result = await pendingClassesCollection.deleteOne(query);
             res.send(result);
         })
@@ -149,25 +149,25 @@ async function run() {
         // =============================Deny class related api activities=======================================
 
         // api for deleting data from pending class as it is denied
-        app.delete('/denied_from_pending_class/:id', async(req, res) =>{
+        app.delete('/denied_from_pending_class/:id', async (req, res) => {
             const id = req.params.id;
             console.log('please delete from database', id);
-            const query = { _id: new ObjectId(id)}
-            
+            const query = { _id: new ObjectId(id) }
+
             const result = await pendingClassesCollection.deleteOne(query);
             res.send(result);
-        }) 
+        })
 
         // api for deleting data from approve class as it is denied
-        app.delete('/denied_from_approved_class/:id', async(req, res) =>{
+        app.delete('/denied_from_approved_class/:id', async (req, res) => {
             const id = req.params.id;
             console.log('please delete from  approve database', id);
-            const query = { _id: (id)}
-            
+            const query = { _id: (id) }
+
             const result = await approvedClassesCollection.deleteOne(query);
             res.send(result);
-        }) 
-         
+        })
+
 
 
 
@@ -175,13 +175,13 @@ async function run() {
 
 
         // ======================Selected class====================================================================
-        app.post('/selected_class', async(req, res) => {
+        app.post('/selected_class', async (req, res) => {
             const user = req.body;
             console.log('new user', user);
             const result = await selectedClassesCollection.insertOne(user);
             res.send(result);
         });
-        app.get('/getting_selected_class', async( req, res) => {
+        app.get('/getting_selected_class', async (req, res) => {
             const cursor = selectedClassesCollection.find()
             const result = await cursor.toArray();
             res.send(result);
@@ -197,7 +197,7 @@ async function run() {
 
 
 
-       
+
 
 
 
@@ -219,26 +219,61 @@ async function run() {
 
 
         // =================stripe payment================================================
+        // Define a function to fetch class details
+        // async function fetchClassDetails(classId) {
+        //     try {
+        //         const query = { _id: new ObjectId(classId) };
+        //         const classDetails = await pendingClassesCollection.findOne(query);
+        //         return classDetails;
+        //     } catch (error) {
+        //         console.error('Error fetching class details:', error);
+        //         return null;
+        //     }
+        // }
+
+
+
+
         app.post('/process_payment', async (req, res) => {
-            const { classId } = req.body;
-            // Fetch the selected class details from the database or any other source
-            
+            const {className ,classId, amount } = req.body;
+
+            console.log('kaj kore', classId)
             try {
+                // Fetch class details based on classId (you need to implement this logic)
+                // const selectedClass = await fetchClassDetails(classId);
+
+                // if (!selectedClass) {
+                //     return res.status(404).json({ error: 'Class not found' });
+                // }
+
                 // Create a Stripe Payment Intent
                 const paymentIntent = await stripe.paymentIntents.create({
-                    amount: selectedClass.amountInCents,
+                    amount: amount,
                     currency: 'usd',
-                    description: `Payment for ${selectedClass.className}`,
-                    metadata: { classId: selectedClass._id.toString() }
+                    description: `Payment for ${className}`,
+                    // metadata: { classId: selectedClass._id.toString() }
                 });
-        
+
+                const result = await enrolledClassesCollection.insertOne({classId,className,amount});
+
                 // Send the Payment Intent client secret back to the client
-                res.json({ clientSecret: paymentIntent.client_secret });
+                res.send(result);
             } catch (error) {
                 console.error('Error processing payment:', error);
                 res.status(500).json({ error: 'Payment processing failed' });
             }
         });
+
+
+
+
+
+
+
+
+
+
+
 
 
         // ===========================================================================================================
