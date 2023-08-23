@@ -187,6 +187,17 @@ async function run() {
             res.send(result);
         })
 
+        app.delete('/delete_class/:id', async(req, res) =>{
+            const id = req.params.id;
+            console.log('please delete from database', id);
+            const query = { _id: new ObjectId(id)}
+            
+            const result = await selectedClassesCollection.deleteOne(query);
+            res.send(result);
+        })
+
+
+
 
 
 
@@ -235,7 +246,7 @@ async function run() {
 
 
         app.post('/process_payment', async (req, res) => {
-            const {className ,classId, amount } = req.body;
+            const {className ,classId, amount ,email} = req.body;
 
             console.log('kaj kore', classId)
             try {
@@ -254,7 +265,7 @@ async function run() {
                     // metadata: { classId: selectedClass._id.toString() }
                 });
 
-                const result = await enrolledClassesCollection.insertOne({classId,className,amount});
+                const result = await enrolledClassesCollection.insertOne({classId,className,amount, email});
 
                 // Send the Payment Intent client secret back to the client
                 res.send(result);
@@ -263,6 +274,12 @@ async function run() {
                 res.status(500).json({ error: 'Payment processing failed' });
             }
         });
+
+        app.get('/getEnrolledClasses', async (req, res) => {
+            const cursor = enrolledClassesCollection.find();
+            const result = await cursor.toArray();
+            res.send(result);
+        })
 
 
 
