@@ -190,7 +190,7 @@ async function run() {
         app.delete('/delete_class/:id', async(req, res) =>{
             const id = req.params.id;
             console.log('please delete from database', id);
-            const query = { _id: new ObjectId(id)}
+            const query = { _id: id}
             
             const result = await selectedClassesCollection.deleteOne(query);
             res.send(result);
