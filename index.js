@@ -229,26 +229,13 @@ async function run() {
 
 
 
-        // =================stripe payment================================================
-        // Define a function to fetch class details
-        // async function fetchClassDetails(classId) {
-        //     try {
-        //         const query = { _id: new ObjectId(classId) };
-        //         const classDetails = await pendingClassesCollection.findOne(query);
-        //         return classDetails;
-        //     } catch (error) {
-        //         console.error('Error fetching class details:', error);
-        //         return null;
-        //     }
-        // }
-
-
+        // =================stripe payment===============================================
 
 
         app.post('/process_payment', async (req, res) => {
-            const {className ,classId, amount ,email} = req.body;
+            const {className , amount ,email} = req.body;
 
-            console.log('kaj kore', classId)
+            // console.log('kaj kore', classId)
             try {
                 // Fetch class details based on classId (you need to implement this logic)
                 // const selectedClass = await fetchClassDetails(classId);
@@ -265,7 +252,7 @@ async function run() {
                     // metadata: { classId: selectedClass._id.toString() }
                 });
 
-                const result = await enrolledClassesCollection.insertOne({classId,className,amount, email});
+                const result = await enrolledClassesCollection.insertOne({className,amount, email});
 
                 // Send the Payment Intent client secret back to the client
                 res.send(result);
