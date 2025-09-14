@@ -33,14 +33,6 @@ const setupMiddleware = (app) => {
             error: process.env.NODE_ENV === 'development' ? err.message : 'Something went wrong'
         });
     });
-    
-    // 404 handler
-    app.use('*', (req, res) => {
-        res.status(404).json({
-            success: false,
-            message: 'Route not found'
-        });
-    });
 };
 
 module.exports = { setupMiddleware };

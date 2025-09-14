@@ -14,6 +14,14 @@ setupMiddleware(app);
 // Setup routes
 app.use('/', routes);
 
+// 404 handler (must be after all routes)
+app.use('*', (req, res) => {
+    res.status(404).json({
+        success: false,
+        message: 'Route not found'
+    });
+});
+
 // Start server
 async function startServer() {
     try {
