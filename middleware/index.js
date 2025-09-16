@@ -1,12 +1,13 @@
 const cors = require('cors');
 const bodyParser = require('body-parser');
 
-// CORS configuration
+// CORS configuration - Open for all origins
 const corsOptions = {
-    origin: process.env.CORS_ORIGIN || '*',
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
-    credentials: true
+    origin: '*', // Allow all origins
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin'],
+    credentials: false, // Set to false when origin is '*'
+    optionsSuccessStatus: 200 // For legacy browser support
 };
 
 // Middleware setup

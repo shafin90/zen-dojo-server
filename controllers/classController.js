@@ -6,6 +6,7 @@ class ClassController {
         try {
             const classData = req.body;
             classData.classStatus = 'pending';
+            console.log('classData', classData);
             
             const newClass = new Class(classData);
             const savedClass = await newClass.save();
